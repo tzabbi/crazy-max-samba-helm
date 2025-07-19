@@ -32,10 +32,10 @@ data:
         {{- end }}
       {{- end }}
     {{- end }}
-    {{- if .Values.gloal}}
+    {{- end }}
+    {{- if .Values.global }}
     global:
     {{- range .Values.global }}
-    - {{ . -}}
+    - "{{ . }}"
     {{- end }}
-    {{- end }}
-    {{- end }}
+    {{ end }}
