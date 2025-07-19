@@ -46,7 +46,7 @@ jobs:
           git push origin v${{ steps.chart.outputs.chart_version }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.chart.outputs.chart_version }}
           name: Helm Chart Release ${{ steps.chart.outputs.chart_version }}
