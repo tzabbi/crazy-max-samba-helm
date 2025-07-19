@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "samba.fullname" . }}
+  namespace: {{ include "samba.namespace" . }}
+  labels:
+    {{- include "samba.labels" . | nindent 4 }}
+    {{- with .Values.statefulSet.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.statefulSet.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "samba.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.statefulSet.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "samba.labels" . | nindent 8 }}
+        {{- with .Values.statefulSet.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "samba.fullname" . }}
+      {{- with .Values.statefulSet.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.statefulSet.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.share }}
+      initContainers:
+        - name: set-share-permissions
+          image: busybox:latest
+          command: ["sh","-c","chown :1001 /mnt/* && chmod 760 /mnt/*"]
+          resources:
+            limits:
+              cpu: "64m"
+              memory: "100Mi"
+          volumeMounts:
+            {{- if $.Values.share }}
+            {{- range $.Values.share }}
+            - mountPath: {{ .path }}
+              name: {{ .name }}
+            {{- end }}
+            {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ include "samba.name" . }}
+          {{- with .Values.statefulSet.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.ports }}
+          ports:
+          {{- range .Values.ports }}
+            - containerPort: {{ .containerPort }}
+              hostPort: {{ .hostPort }}
+              name: {{ .name }}
+              protocol: TCP
+          {{- end }}
+          {{- end }}
+          {{- if .Values.auth }}
+          env:
+          {{- range .Values.auth }}
+            - name: {{ .user | upper }}_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: samba-user-{{ .user }}-password
+                  key: password
+          {{- end }}
+          {{- end }}
+          {{- with .Values.statefulSet.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.statefulSet.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.statefulSet.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /data/{{ include "samba.configFileName" . }}
+              name: {{ include "samba.configFileName" . | replace "." "-"}}
+              subPath: {{ include "samba.configFileName" . }}
+              readOnly: true
+            - mountPath: /data
+              name: data-dir
+            {{- if .Values.share }}
+            {{- range .Values.share }}
+            - mountPath: {{ .path }}
+              name: {{ .name }}
+            {{- end }}
+            {{- end }}
+      volumes:
+      - name: {{ include "samba.configFileName" . | replace "." "-"}}
+        configMap:
+          name: samba-{{ include "samba.configFileName" . | replace "." "-"}}
+          items:
+            - key: {{ include "samba.configFileName" . }}
+              path: {{ include "samba.configFileName" . }}
+      - name: data-dir
+        persistentVolumeClaim:
+          claimName: {{ include "samba.name" . }}-data
+      {{- if .Values.share }}
+      {{- range .Values.share }}
+      - name: {{ .name }}
+        persistentVolumeClaim:
+          claimName: {{ include "samba.name" $ }}-{{ .name }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.statefulSet.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.statefulSet.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.statefulSet.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
