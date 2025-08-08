@@ -13,23 +13,33 @@
   "packageRules": [
     {
       "description": "Automerge patch",
-      "matchUpdateTypes": ["patch"],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true
     },
     {
       "description": "No automerge for minor and major updates",
-      "matchUpdateTypes": ["minor", "major"],
+      "matchUpdateTypes": [
+        "minor",
+        "major"
+      ],
       "automerge": false
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["^charts/.+/Chart.yaml$"],
-      "matchStrings": ["appVersion:\\s?\"?(?<currentValue>.*?)\"?$"],
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^charts/.+/Chart.yaml$/"
+      ],
+      "matchStrings": [
+        "appVersion:\\s?\"?(?<currentValue>.*?)\"?$"
+      ],
       "depNameTemplate": "crazy-max-samba",
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker",
-      "lookupNameTemplate": "ghcr.io/crazy-max/samba"
+      "packageNameTemplate": "ghcr.io/crazy-max/samba"
     }
   ]
 }
