@@ -67,7 +67,9 @@ spec:
           ports:
           {{- range .Values.ports }}
             - containerPort: {{ .containerPort }}
+              {{- if $.Values.hostPort.enabled }}
               hostPort: {{ .hostPort }}
+              {{- end }}
               name: {{ .name }}
               protocol: TCP
           {{- end }}

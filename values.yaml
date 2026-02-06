@@ -12,7 +12,7 @@
 
 image:
   # -- The repository and image which is used.
-  repository: "ghcr.io/crazy-max/samba"
+  repository: 'ghcr.io/crazy-max/samba'
   # tag: "4.21.4"
   # -- The pullpolicy of the image.
   # Default: IfNotPresent
@@ -25,6 +25,26 @@ ports:
   - name: samba
     containerPort: 445
     hostPort: 445
+
+# -- Configuration for hostPort
+hostPort:
+  # -- Enable hostPort
+  enabled: true
+
+# -- Configuration for Gateway API TCPRoute
+tcpRoute:
+  # -- Enable TCPRoute creation
+  enabled: false
+  # -- Annotations to add to the TCPRoute
+  annotations: {}
+  # -- Labels to add to the TCPRoute
+  labels: {}
+  # -- The parentRefs for the TCPRoute
+  # parentRefs:
+  #   - name: gateway
+  #     namespace: gateway-api
+  #     sectionName: samba
+  parentRefs: []
 
 # --Service to reach smb container in the cluster.
 service:
@@ -66,7 +86,7 @@ statefulSet:
         - -L
         - \\localhost
         - -U
-        - "%"
+        - '%'
         - -m
         - SMB3
     initialDelaySeconds: 10
@@ -89,8 +109,8 @@ statefulSet:
   # Example below.
   resources:
     requests:
-      memory: "64Mi"
-      cpu: "250m"
+      memory: '64Mi'
+      cpu: '250m'
     # limits:
     #   memory: "128Mi"
     #   cpu: "500m"
@@ -116,8 +136,8 @@ storage:
 
 # -- Additional environment variables for the samba server which will be injected to the container.
 envs:
-  - TZ: "Europe/Paris"
-  - SAMBA_LOG_LEVEL: "0"
+  - TZ: 'Europe/Paris'
+  - SAMBA_LOG_LEVEL: '0'
 
 # -- The usermanagement.
 # Each user will be created on the samba server container.

@@ -1,0 +1,25 @@
+{{- if .Values.tcpRoute.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: {{ include "samba.fullname" . }}
+  namespace: {{ include "samba.namespace" . }}
+  labels:
+    {{- include "samba.labels" . | nindent 4 }}
+    {{- with .Values.tcpRoute.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.tcpRoute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.tcpRoute.parentRefs | nindent 4 }}
+  rules:
+    {{- range .Values.ports }}
+    - backendRefs:
+        - name: {{ include "samba.name" $ }}
+          port: {{ .containerPort }}
+    {{- end }}
+{{- end }}
