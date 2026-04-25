@@ -133,6 +133,9 @@ storage:
   # If there is no one configured, it uses the default storageClass
   # storageClassName:
   size: 5Gi
+  # -- Labels to add to the data PVC
+  # labels:
+  #   example-label: example-value
 
 # -- Additional environment variables for the samba server which will be injected to the container.
 envs:
@@ -157,6 +160,7 @@ auth:
 # See Documentation for more information: https://github.com/crazy-max/docker-samba?tab=readme-ov-file#configuration
 # In addition you can specify the size of every share and the storageClass which the share should use.
 # If you don't specify the StorageClassName, the share will use the default one.
+# You can also add custom labels to each share PVC using the labels field.
 share:
   # - name: misc
   #   path: /mnt/misc
@@ -164,6 +168,8 @@ share:
   #   guestok: "no"
   #   size: 10Gi
   #   storageClassName:
+  #   labels:
+  #     my-custom-label: my-value
   # - name: backup
   #   path: /mnt/backup
   #   readonly: "no"
@@ -171,6 +177,8 @@ share:
   #   validusers: "backup"
   #   size: 8Gi
   #   storageClassName:
+  #   labels:
+  #     my-custom-label: my-value
 # -- Set global settings for samba server see: https://github.com/crazy-max/docker-samba?tab=readme-ov-file#configuration
 # global:
 #   - "force user = foo"
