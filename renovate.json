@@ -1,0 +1,43 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":semanticPrefixChore",
+    ":label(dependencies)",
+    ":disableRateLimiting"
+  ],
+  "enabledManagers": ["helmv3", "regex"],
+  "automergeType": "pr",
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "description": "Automerge patch updates",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "description": "Require manual review for minor and major updates",
+      "matchUpdateTypes": ["minor", "major"],
+      "automerge": false
+    },
+    {
+      "description": "Bump Helm chart version on samba image update",
+      "matchDepNames": ["ghcr.io/crazy-max/samba"],
+      "bumpVersion": "patch"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track samba docker image version via appVersion in Chart.yaml",
+      "managerFilePatterns": ["(^|/)Chart\\.yaml$"],
+      "matchStrings": [
+        "appVersion:\\s*['\"]?(?<currentValue>[^'\"\\s]+)['\"]?"
+      ],
+      "depNameTemplate": "ghcr.io/crazy-max/samba",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
