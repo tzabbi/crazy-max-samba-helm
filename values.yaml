@@ -136,9 +136,6 @@ storage:
   # -- Labels to add to the data PVC
   # labels:
   #   example-label: example-value
-  # -- Labels to add to the data PVC
-  # labels:
-  #   example-label: example-value
   # -- Annotations to add to the data PVC
   # annotations:
   #   my-custom-annotation: my-value
