@@ -6,13 +6,6 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "samba.name" $ }}-{{ .name }}
   namespace: {{ include "samba.namespace" $ }}
-<<<<<<< Updated upstream
-||||||| Stash base
-  {{- with .labels }}
-  labels:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-=======
   {{- with .labels }}
   labels:
     {{- toYaml . | nindent 4 }}
@@ -21,7 +14,6 @@ metadata:
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
->>>>>>> Stashed changes
 spec:
   {{- if .storageClassName }}
   storageClassName: {{ .storageClassName -}}
