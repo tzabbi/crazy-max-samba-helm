@@ -43,10 +43,10 @@ spec:
         - name: set-share-permissions
           image: busybox:latest
           command: ["sh","-c","chown :1001 /mnt/* && chmod 760 /mnt/*"]
+          {{- with .Values.statefulSet.resources -}}
           resources:
-            limits:
-              cpu: "64m"
-              memory: "100Mi"
+          {{ . }}
+          {{- end }}
           volumeMounts:
             {{- if $.Values.share }}
             {{- range $.Values.share }}

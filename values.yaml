@@ -109,8 +109,10 @@ statefulSet:
   # Example below.
   resources:
     requests:
-      memory: '64Mi'
-      cpu: '250m'
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
     # limits:
     #   memory: "128Mi"
     #   cpu: "500m"
