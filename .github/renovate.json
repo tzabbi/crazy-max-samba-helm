@@ -29,13 +29,8 @@
   ],
   "customManagers": [
     {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/^charts/.+/Chart.yaml$/"
-      ],
-      "matchStrings": [
-        "appVersion:\\s?\"?(?<currentValue>.*?)\"?$"
-      ],
+      "fileMatch": ["^Chart.yaml$", "^charts/.+/Chart.yaml$"],
+      "matchStrings": ["appVersion:\\s?\"?(?<currentValue>.*?)\"?$"],
       "depNameTemplate": "crazy-max-samba",
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker",
