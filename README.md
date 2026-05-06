@@ -1,28 +1,248 @@
-# crazy-max-samba
+# crazy-max-samba Helm Chart
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.21.4](https://img.shields.io/badge/AppVersion-4.21.4-informational?style=flat-square)
+This Helm chart deploys a Samba server based on the Docker image from [crazy-max/docker-samba](https://github.com/crazy-max/docker-samba).
 
-A Helm chart for crazy-max/docker-samba
+## Project links
 
-## Values
+- OCI chart: `oci://ghcr.io/tzabbi/charts/crazy-max-samba`
+- Docker image: `ghcr.io/crazy-max/samba`
+- Upstream container image project: <https://github.com/crazy-max/docker-samba>
+- Upstream Samba configuration documentation: <https://github.com/crazy-max/docker-samba?tab=readme-ov-file#configuration>
 
-| Key                            | Type   | Default                                                                                                                                                                                                                                                                                                                                                                                                                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| auth                           | string | `nil`                                                                                                                                                                                                                                                                                                                                                                                                                     | The usermanagement. Each user will be created on the samba server container. The password of each user can be written here in in plain text but it is strongly discouraged. By default it uses the environment variable which will read by a secret called samba-user-{{ .user }}-password. You have to create this secret manually. It is recommended to use something like sealed secrets to encrypt you secrets and be able to check it into your git repository. IMPORTANT: use the group name samba_users!!! This name is hardcoded in the init container to fix permission management! |
-| envs                           | list   | `[{"TZ":"Europe/Paris"},{"SAMBA_LOG_LEVEL":"0"}]`                                                                                                                                                                                                                                                                                                                                                                         | Additional environment variables for the samba server which will be injected to the container.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| image.repository               | string | `"ghcr.io/crazy-max/samba"`                                                                                                                                                                                                                                                                                                                                                                                               | The repository and image which is used.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| image.tag                      | string | `"4.19.9@sha256:270a8dcaeb7be73c3a63e2d7cc966cfdc6ca70b418c59e4af406bee6ea41ded7"`                                                                                                                                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ports                          | list   | `[{"containerPort":445,"hostPort":445,"name":"samba"}]`                                                                                                                                                                                                                                                                                                                                                                   | The ports used to access the samba server. It is possible to configure multiple ports: https://github.com/crazy-max/docker-samba?tab=readme-ov-file#ports                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| service                        | object | `{"enabled":false}`                                                                                                                                                                                                                                                                                                                                                                                                       | Service to reach smb container in the cluster.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| share                          | list   | `[{"guestok":"no","name":"misc","path":"/mnt/misc","readonly":"no","size":"10Gi","storageClassName":null},{"guestok":"no","name":"backup","path":"/mnt/backup","readonly":"no","size":"8Gi","storageClassName":null,"validusers":"backup"}]`                                                                                                                                                                              | Configuration of every share you want to create. See Documentation for more information: https://github.com/crazy-max/docker-samba?tab=readme-ov-file#configuration In addition you can specify the size of every share and the storageClass which the share should use. If you don't specify the StorageClassName, the share will use the default one.                                                                                                                                                                                                                                      |
-| statefulSet                    | object | `{"livenessProbe":{"exec":{"command":["smbclient","-L","\\\\localhost","-U","%","-m","SMB3"]},"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":30,"timeoutSeconds":5},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"exec":{"command":["smbstatus"]},"failureThreshold":3,"initialDelaySeconds":5,"periodSeconds":10,"timeoutSeconds":3},"resources":{"requests":{"cpu":"250m","memory":"64Mi"}}}` | statefulset configuration                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| statefulSet.livenessProbe      | object | `{"exec":{"command":["smbclient","-L","\\\\localhost","-U","%","-m","SMB3"]},"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":30,"timeoutSeconds":5}`                                                                                                                                                                                                                                                        | Checks whether the Samba service is still running by connecting to localhost with smbclient.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| statefulSet.podSecurityContext | object | `{"fsGroup":1001}`                                                                                                                                                                                                                                                                                                                                                                                                        | Set podSecurityContext for the samba POD See: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| statefulSet.readinessProbe     | object | `{"exec":{"command":["smbstatus"]},"failureThreshold":3,"initialDelaySeconds":5,"periodSeconds":10,"timeoutSeconds":3}`                                                                                                                                                                                                                                                                                                   | Uses smbstatus to check whether Samba is active and can accept clients.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| statefulSet.resources          | object | `{"requests":{"cpu":"250m","memory":"64Mi"}}`                                                                                                                                                                                                                                                                                                                                                                             | Define the resources of the samba pod. See: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ Example below.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| storage                        | object | `{"size":"5Gi"}`                                                                                                                                                                                                                                                                                                                                                                                                          | The storage configuration for the samba server data directory.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| storage.size                   | string | `"5Gi"`                                                                                                                                                                                                                                                                                                                                                                                                                   | The storageClassName can be configured here. If there is no one configured, it uses the default storageClass storageClassName:                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+## OCI publishing
 
----
+This chart is published as an OCI artifact to GitHub Container Registry (GHCR).
 
-Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
+On every merge to `main`, the GitHub Actions workflow will:
+
+- lint the chart
+- bump the patch version in `Chart.yaml`
+- package the chart
+- push the chart to GHCR as an OCI artifact
+- create a Git tag and GitHub Release for the new chart version
+
+The published OCI reference is:
+
+`oci://ghcr.io/tzabbi/charts/crazy-max-samba`
+
+## What this chart creates
+
+This chart creates the following resources:
+
+- a `StatefulSet` for the Samba server
+- a PVC for `/data`
+- optionally one PVC per share defined in `share`
+- optionally a Kubernetes `Service` when `service.enabled=true`
+- a `ConfigMap` containing the Samba configuration
+
+## Requirements
+
+- a Kubernetes cluster
+- Helm 3.8 or newer for OCI-based installs
+- a working `StorageClass` or suitable statically provisioned volumes
+- a free `445/TCP` port on the target node if you use the default configuration with `hostPort: 445`
+
+## Quick start
+
+### 1. Create a namespace
+
+```bash
+kubectl create namespace samba
+```
+
+### 2. Create password secret(s)
+
+By default, the chart expects one Secret per user named `samba-user-<user>-password` with the key `password`.
+
+Example for the user `backup`:
+
+```bash
+kubectl -n samba create secret generic samba-user-backup-password \
+  --from-literal=password='MySecurePassword'
+```
+
+### 3. Create your own values file
+
+Example `my-values.yaml`:
+
+```yaml
+service:
+  enabled: true
+
+envs:
+  - TZ: "Europe/Berlin"
+  - SAMBA_LOG_LEVEL: "1"
+
+auth:
+  - user: backup
+    password: ${BACKUP_USER_PASSWORD}
+    uid: 1001
+    gid: 1001
+    group: samba_users
+
+share:
+  - name: backup
+    path: /mnt/backup
+    readonly: "no"
+    guestok: "no"
+    validusers: backup
+    size: 20Gi
+    storageClassName: standard
+
+global:
+  - "map to guest = never"
+```
+
+## Installation
+
+### Install from the OCI registry
+
+If the GHCR package is private, authenticate first:
+
+```bash
+helm registry login ghcr.io -u <github-username>
+```
+
+Install the chart from GHCR:
+
+```bash
+helm upgrade --install samba oci://ghcr.io/tzabbi/charts/crazy-max-samba \
+  --version <chart-version> \
+  --namespace samba \
+  --create-namespace \
+  -f my-values.yaml
+```
+
+### Pull the chart locally from OCI
+
+```bash
+helm pull oci://ghcr.io/tzabbi/charts/crazy-max-samba \
+  --version <chart-version> \
+  --untar
+```
+
+### Local development install
+
+If you are working directly in this repository, you can still install the local chart without using OCI:
+
+```bash
+helm upgrade --install samba . \
+  --namespace samba \
+  --create-namespace \
+  -f my-values.yaml
+```
+
+## Important configuration notes
+
+### Users and passwords
+
+- Define Samba users in `auth`.
+- The group should be `samba_users`.
+- `gid` should be `1001` because the chart uses that ID for share permissions.
+- The `password` field typically references an environment variable such as `${BACKUP_USER_PASSWORD}`.
+- The actual password is then read from the Kubernetes Secret `samba-user-backup-password`.
+
+### Shares
+
+Each item in `share`:
+
+- creates a Samba share
+- mounts the path defined in `path` into the container
+- creates a dedicated PVC with the configured `size`
+- can optionally use its own `storageClassName`
+
+### Network access
+
+By default, the chart uses `hostPort: 445`. That means:
+
+- the pod binds port `445` directly on the Kubernetes node
+- port `445` must not already be in use on that node
+- clients can access the share through the node IP address
+
+If you also want an internal Kubernetes Service, enable:
+
+```yaml
+service:
+  enabled: true
+```
+
+## Verify the deployment
+
+```bash
+kubectl -n samba get pods,pvc,svc
+```
+
+You can also run the Helm test:
+
+```bash
+helm test samba -n samba
+```
+
+## Access the Samba server
+
+### List available shares
+
+Example with `smbclient`:
+
+```bash
+smbclient -L //<NODE-IP> -U backup
+```
+
+### Mount a share
+
+Linux example:
+
+```bash
+sudo mount -t cifs //<NODE-IP>/backup /mnt/backup \
+  -o username=backup
+```
+
+Replace `<NODE-IP>` with the IP address of the Kubernetes node running the pod.
+
+## Upgrade
+
+Upgrade from the OCI registry with:
+
+```bash
+helm upgrade samba oci://ghcr.io/tzabbi/charts/crazy-max-samba \
+  --version <chart-version> \
+  --namespace samba \
+  -f my-values.yaml
+```
+
+For local development, you can still use:
+
+```bash
+helm upgrade samba . \
+  --namespace samba \
+  -f my-values.yaml
+```
+
+## Uninstall
+
+```bash
+helm uninstall samba -n samba
+```
+
+Note: depending on your cluster and storage setup, PersistentVolumeClaims may remain and need to be deleted separately if required.
+
+## Useful values
+
+The most important settings are:
+
+- `image.repository`: defaults to `ghcr.io/crazy-max/samba`
+- `image.tag`: optionally overrides the image tag
+- `service.enabled`: creates an internal ClusterIP Service
+- `storage.size`: size of the PVC for `/data`
+- `storage.storageClassName`: StorageClass for `/data`
+- `auth`: user definitions
+- `share`: Samba shares including PVC size
+- `envs`: additional environment variables for the container
+- `statefulSet.resources`: CPU and memory requests/limits
+- `statefulSet.nodeSelector`, `statefulSet.affinity`, `statefulSet.tolerations`: pod scheduling
+
+## Additional notes
+
+For advanced Samba-specific configuration options, the upstream container project documentation is the primary reference:
+
+<https://github.com/crazy-max/docker-samba>

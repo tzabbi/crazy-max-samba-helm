@@ -1,19 +1,44 @@
-Congratulations! Your Samba server has been successfully deployed.
+Thank you for installing `{{ include "samba.name" . }}`.
 
-To access your Samba server, use the following information:
+Your Samba server has been deployed in namespace `{{ include "samba.namespace" . }}`.
 
-Service Name: {{ .Release.Name }}-{{ .Chart.Name }}
-Namespace: {{ .Release.Namespace }}
+{{- if .Values.service.enabled }}
+A ClusterIP Service has been created:
 
-By default, the Samba server listens on the following ports:
-- SMB: 445
-- NetBIOS: 137, 138, 139
+- Service name: `{{ include "samba.name" . }}`
+- Namespace: `{{ include "samba.namespace" . }}`
 
-You can mount the shares with an SMB client as follows:
+To inspect the Service:
 
-smbclient -L //<server ip> -U <username>
+  kubectl -n {{ include "samba.namespace" . }} get svc {{ include "samba.name" . }}
+{{- else }}
+No Kubernetes Service was created because `service.enabled=false`.
 
-Replace `<username>` with the actual user name.
+This chart uses `hostPort` by default, so Samba is exposed on the Kubernetes node where the pod is running.
+Use the node IP address together with port `445/TCP` to connect.
+{{- end }}
 
-Further information and configuration options can be found in the README of the project:
-https://github.com/crazy-max/docker-samba/helm/samba/README.md
+Configured ports:
+{{- range .Values.ports }}
+- `{{ .name }}`: container `{{ .containerPort }}`{{- if .hostPort }}, host `{{ .hostPort }}`{{- end }}
+{{- end }}
+
+Useful commands:
+
+- Check pods:
+  `kubectl -n {{ include "samba.namespace" . }} get pods`
+- Check PVCs:
+  `kubectl -n {{ include "samba.namespace" . }} get pvc`
+- Run Helm test:
+  `helm test {{ .Release.Name }} -n {{ include "samba.namespace" . }}`
+
+To list shares with `smbclient`:
+
+  smbclient -L //<node-ip> -U <username>
+
+Replace `<node-ip>` with the node IP running the pod, and `<username>` with a configured Samba user.
+
+For chart usage and configuration details:
+- Repository README: https://github.com/tzabbi/crazy-max-samba-helm#readme
+- Upstream image project: https://github.com/crazy-max/docker-samba
+- OCI chart reference: oci://ghcr.io/tzabbi/charts/crazy-max-samba

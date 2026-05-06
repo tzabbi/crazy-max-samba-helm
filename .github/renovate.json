@@ -24,7 +24,7 @@
   ],
   "regexManagers": [
     {
-      "fileMatch": ["^charts/.+/Chart.yaml$"],
+      "fileMatch": ["^Chart.yaml$", "^charts/.+/Chart.yaml$"],
       "matchStrings": ["appVersion:\\s?\"?(?<currentValue>.*?)\"?$"],
       "depNameTemplate": "crazy-max-samba",
       "datasourceTemplate": "docker",

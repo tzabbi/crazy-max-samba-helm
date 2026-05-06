@@ -1,6 +1,20 @@
 apiVersion: v2
 name: crazy-max-samba
 description: A Helm chart for crazy-max/docker-samba
+home: https://github.com/crazy-max/docker-samba
+sources:
+  - https://github.com/tzabbi/crazy-max-samba-helm
+  - https://github.com/crazy-max/docker-samba
+keywords:
+  - samba
+  - smb
+  - cifs
+  - nas
+  - storage
+icon: https://github.com/crazy-max.png
+maintainers:
+  - name: Tom Zaspel
+    url: https://github.com/tzabbi
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -21,4 +35,4 @@ version: 1.0.1
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "4.21.4"
+appVersion: "4.22.8"
