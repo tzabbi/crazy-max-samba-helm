@@ -67,12 +67,14 @@ spec:
           ports:
           {{- range .Values.ports }}
             - containerPort: {{ .containerPort }}
+              {{- if .hostPort }}
               hostPort: {{ .hostPort }}
+              {{- end }}
               name: {{ .name }}
               protocol: TCP
           {{- end }}
           {{- end }}
-          {{- if .Values.auth }}
+          {{- if or .Values.auth .Values.envs }}
           env:
           {{- range .Values.auth }}
             - name: {{ .user | upper }}_USER_PASSWORD
@@ -81,6 +83,16 @@ spec:
                   name: samba-user-{{ .user }}-password
                   key: password
           {{- end }}
+          {{- range .Values.envs }}
+            {{- range $key, $value := . }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.statefulSet.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.statefulSet.livenessProbe }}
           livenessProbe:

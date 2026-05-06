@@ -22,7 +22,7 @@ data:
     {{- range .Values.share }}
     - {{- $first := true }}
       {{- range $key, $value := . }}
-        {{- if or (ne $key "size") (ne $key "storageClassName") }}
+        {{- if and (ne $key "size") (ne $key "storageClassName") }}
           {{- if not $first }}
           {{- printf "\n      %s: %s" $key $value }}
           {{- else }}

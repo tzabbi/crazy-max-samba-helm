@@ -166,6 +166,25 @@ service:
   enabled: true
 ```
 
+### Health probes and backup workloads
+
+The chart now uses TCP-based `startupProbe`, `livenessProbe`, and `readinessProbe` defaults on port `445`.
+This is more reliable than exec-based probes during large Home Assistant backups or other heavy SMB traffic.
+
+If your workload is backup-heavy, consider increasing resources as well:
+
+```yaml
+statefulSet:
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "256Mi"
+    limits:
+      memory: "1Gi"
+```
+
+If possible, run Samba on a worker node instead of a control-plane node.
+
 ## Verify the deployment
 
 ```bash
@@ -238,6 +257,7 @@ The most important settings are:
 - `auth`: user definitions
 - `share`: Samba shares including PVC size
 - `envs`: additional environment variables for the container
+- `statefulSet.startupProbe`, `statefulSet.livenessProbe`, `statefulSet.readinessProbe`: health probe tuning
 - `statefulSet.resources`: CPU and memory requests/limits
 - `statefulSet.nodeSelector`, `statefulSet.affinity`, `statefulSet.tolerations`: pod scheduling
 
