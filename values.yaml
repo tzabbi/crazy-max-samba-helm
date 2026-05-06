@@ -77,43 +77,41 @@ statefulSet:
   # Group of the samba users specified in the auth section
   # securityContext:
 
-  # -- Configure health of the pod by defining live- and readinessProbes.
-  # -- Checks whether the Samba service is still running by connecting to localhost with smbclient.
-  livenessProbe:
-    exec:
-      command:
-        - smbclient
-        - -L
-        - \\localhost
-        - -U
-        - '%'
-        - -m
-        - SMB3
-    initialDelaySeconds: 10
-    periodSeconds: 30
-    timeoutSeconds: 5
-    failureThreshold: 3
-
-  # -- Uses smbstatus to check whether Samba is active and can accept clients.
-  readinessProbe:
-    exec:
-      command:
-        - smbstatus
-    initialDelaySeconds: 5
+  # -- Configure startup health checks. A TCP probe is more resilient than exec probes under heavy backup load.
+  startupProbe:
+    tcpSocket:
+      port: 445
     periodSeconds: 10
     timeoutSeconds: 3
-    failureThreshold: 3
+    failureThreshold: 30
+
+  # -- Configure health of the pod by defining live- and readinessProbes.
+  # -- A TCP probe avoids spawning extra processes inside the container while Samba is busy.
+  livenessProbe:
+    tcpSocket:
+      port: 445
+    periodSeconds: 20
+    timeoutSeconds: 3
+    failureThreshold: 10
+
+  # -- Uses a TCP check on the Samba port so transient load does not fail exec-based probes.
+  readinessProbe:
+    tcpSocket:
+      port: 445
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 6
 
   # -- Define the resources of the samba pod.
   # See: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   # Example below.
   resources:
     requests:
-      memory: 256Mi
-      cpu: 100m
-    limits:
-      memory: 256Mi
-    #   cpu: "500m"
+      memory: "128Mi"
+      cpu: "250m"
+    # limits:
+    #   memory: "512Mi"
+    #   cpu: "1000m"
 
   # -- Select node. Important if you have some local storage.
   # See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
