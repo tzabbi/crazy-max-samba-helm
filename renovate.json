@@ -5,9 +5,7 @@
     {
       "customType": "regex",
       "fileMatch": ["Chart\\.yaml$"],
-      "matchStrings": [
-        "appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
-      ],
+      "matchStrings": ["appVersion:\\s+(?<currentValue>.*)"],
       "depNameTemplate": "ghcr.io/crazy-max/samba",
       "datasourceTemplate": "docker"
     }
