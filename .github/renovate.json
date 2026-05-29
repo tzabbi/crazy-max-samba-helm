@@ -13,28 +13,20 @@
   "packageRules": [
     {
       "description": "Automerge patch",
-      "matchUpdateTypes": [
-        "patch"
-      ],
+      "matchUpdateTypes": ["patch"],
       "automerge": true
     },
     {
       "description": "No automerge for minor and major updates",
-      "matchUpdateTypes": [
-        "minor",
-        "major"
-      ],
+      "matchUpdateTypes": ["minor", "major"],
       "automerge": false
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "/^Chart.yaml$/",
-        "/^charts/.+/Chart.yaml$/"
-      ],
-      "matchStrings": ["appVersion:\\s?\"?(?<currentValue>.*?)\"?$"],
+      "managerFilePatterns": ["/^Chart.yaml$/", "/^charts/.+/Chart.yaml$/"],
+      "matchStrings": ["appVersion:\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "crazy-max-samba",
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker",
